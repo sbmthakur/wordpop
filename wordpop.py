@@ -2,6 +2,7 @@
 import os
 import redis
 import json
+import random
 
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -9,9 +10,12 @@ key = redis_client.randomkey()
 json_str = redis_client.get(key)
 word_data = json.loads(json_str)
 
-definition = word_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+lexical_entries_length = len(word_data['results'][0]['lexicalEntries'])
+random_entry = random.randint(0, lexical_entries_length - 1)
+lexical_category = word_data['results'][0]['lexicalEntries'][random_entry]['lexicalCategory']
+definition = word_data['results'][0]['lexicalEntries'][random_entry]['entries'][0]['senses'][0]['definitions'][0]
 word = word_data['results'][0]['word']
 
-cmd = 'notify-send "' + word + '" "' + definition + '"'
+cmd = '/usr/bin/notify-send "' + word + ' | ' + lexical_category + '" "' + definition + '"'
 print cmd
 os.system(cmd)
