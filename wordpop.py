@@ -35,8 +35,11 @@ word = word_data['results'][0]['word']
 synonym = fetch_synonym(word_data['synonyms'])
 
 #This is done fot the sake of formatting
+#If no synonym exists then simlpy make it a blank string
 if synonym:
     synonym = ' | ' + synonym
+else:
+    synonym = ''
 
 cmd = '/usr/bin/notify-send "' + word + ' | ' + lexical_category + synonym + '" "' + definition + '\nEx: ' + example_sentence + '"'
 print cmd
