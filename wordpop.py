@@ -3,6 +3,7 @@ import os
 import redis
 import json
 import random
+import subprocess
 
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -13,6 +14,12 @@ def fetch_synonym(synonyms):
         return synonyms.split(',')[0]
     else:
         return None
+
+def get_dbus_session_bus_address():
+    dbus="grep -z DBUS_SESSION_BUS_ADDRESS /proc/$(ps axu | grep [n]autilus | awk '{print $2}')/environ | sed 's/DBUS_SESSION_BUS_ADDRESS=//'"
+    popen = subprocess.Popen(dbus, shell=True, stdout=subprocess.PIPE).communicate()[0]
+    return popen.splitlines()[0].replace("\x00","")
+
 
 key = redis_client.randomkey()
 json_str = redis_client.get(key)
@@ -40,6 +47,10 @@ if synonym:
     synonym = ' | ' + synonym
 else:
     synonym = ''
+
+#dbus="grep -z DBUS_SESSION_BUS_ADDRESS /proc/$(ps axu | grep [n]autilus | awk '{print $2}')/environ | sed 's/DBUS_SESSION_BUS_ADDRESS=//'"
+#popen = subprocess.Popen(dbus, shell=True, stdout=subprocess.PIPE).communicate()[0]
+os.environ['DBUS_SESSION_BUS_ADDRESS'] = get_dbus_session_bus_address()
 
 cmd = '/usr/bin/notify-send "' + word + ' | ' + lexical_category + synonym + '" "' + definition + '\nEx: ' + example_sentence + '"'
 print cmd
